@@ -16,9 +16,9 @@ class TopWin:
                            headings=('№', 'Дата', 'Контрагент'),
                            rows=self.book.get_str_list(
                                name_list='Docs',
-                               columns=[{'position': 1, 'format': '', 'trans': ''},
-                                        {'position': 4, 'format': '', 'trans': ''},
-                                        {'position': 3, 'format': '', 'trans': 'counterparty'}]),
+                               columns=[{'position': 1, 'format': '', 'trans': '', 'width': 50},
+                                        {'position': 4, 'format': '', 'trans': '', 'width': 75},
+                                        {'position': 3, 'format': '', 'trans': 'counterparty', 'width': 300}]),
                            width_column=(50, 75, 300))
         self.table.table.bind('<<TreeviewSelect>>', self.on_select)
         self.table.pack(expand=tk.YES, fill=tk.BOTH)

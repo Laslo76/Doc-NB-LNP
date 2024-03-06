@@ -1,6 +1,7 @@
 ﻿from openpyxl import load_workbook
 import os
 
+
 def fio(str_fio: str, order='fio') -> str:
     list_fio = str_fio.split()
     if order == 'fio':
@@ -13,7 +14,9 @@ class MWX:
     def __init__(self) -> None:
         self.book = load_workbook('NBL.xlsx')
 
-    def search_row(self, page_name, list_search=list()) -> int:
+    def search_row(self, page_name, list_search=None) -> int:
+        if list_search is None:
+            list_search = list()
         result_search = 0
         sheet = self.book[page_name]
         for row in range(2, sheet.max_row + 1):
@@ -41,13 +44,15 @@ class MWX:
             return result
         try:
             value = self.book[page_name].cell(row, col).value
-        except:
+        except Exception:
             value = ''
         if value is None:
             value = ''
         return value
 
-    def get_name(self, page_name: str, list_search=list(), default='') -> str:
+    def get_name(self, page_name: str, list_search=None, default='') -> str:
+        if list_search is None:
+            list_search = list()
         row = self.search_row(page_name, list_search)
         if 0 == row:
             return default
@@ -113,7 +118,9 @@ class MWX:
                 return f'{name}, {address}'
         return f''
 
-    def test_double(self, name_page, current_row=0, list_test=list()):
+    def test_double(self, name_page, current_row=0, list_test=None):
+        if list_test is None:
+            list_test = list()
         sheet = self.book[name_page]
         count_double = 0
         for row in range(2, sheet.max_row + 1):
@@ -145,7 +152,9 @@ class MWX:
                             for col in columns]) for crow in rows]
         return list_docs
 
-    def save_list(self, name_sheet='', row: int = 0, list_data=list()) -> None:
+    def save_list(self, name_sheet='', row: int = 0, list_data=None) -> None:
+        if list_data is None:
+            list_data = list()
         sheet = self.book[name_sheet]
         if row == 0:
             row = sheet.max_row + 1
@@ -164,7 +173,7 @@ class MWX:
         template_sf = load_workbook('торг12.xlsx')
         target_page = template_sf.active
 
-        customer = self.total_customer(row_print)
+        customer = self.total_customer(str(row_print))
         dic_str = self.search_product(str(page.cell(row_print, 14).value))
         dic_nds = self.search_nds(str(page.cell(row_print, 13).value))
 
@@ -221,7 +230,7 @@ class MWX:
         doc_adr_pog = self.giv_const('Адрес отгрузки')
         doc_shipped = self.giv_const('Отпустил ФИО')
         doc_post_shipped = self.giv_const('Отпустил должность')
-        doc_adr_raz = self.total_customer(s_page.cell(row_print, 3).value, 'addr')
+        doc_adr_raz = self.total_customer(s_page.cell(row_print, 3).value, row_print, 'addr')
 
         if not (doc_prefix is None):
             doc_number_prn = doc_prefix
@@ -239,7 +248,7 @@ class MWX:
         target_page.cell(8, 46).value = doc_number_prn
         # РАЗДЕЛ 2
         target_page.cell(17, 2).value = customer
-        target_page.cell(19, 2).value = self.total_customer(s_page.cell(row_print, 3).value, 'addr')
+        target_page.cell(19, 2).value = self.total_customer(s_page.cell(row_print, 3).value, row_print, 'addr')
         # РАЗДЕЛ 3
         target_page.cell(22, 2).value = dic_str['наименование']
         vr = float(s_page.cell(row_print, 19).value)
@@ -268,7 +277,7 @@ class MWX:
         target_page.cell(36, 2).value = f'дата доставки: {doc_date}'
         target_page.cell(38, 30).value = f'Пломбы: {s_page.cell(row_print, 8).value}'
         # РАЗДЕЛ 6
-        target_page.cell(41, 2).value = self.total_customer(s_page.cell(row_print, 21).value, 'trans')
+        target_page.cell(41, 2).value = self.total_customer(s_page.cell(row_print, 21).value, row_print, 'trans')
         target_page.cell(41, 30).value = f'{s_page.cell(row_print, 9).value}'
         # РАЗДЕЛ 7
         target_page.cell(44, 2).value = f'{s_page.cell(row_print, 11).value}'
@@ -308,15 +317,15 @@ class MWX:
         target_page.cell(2, 19).value = s_page.cell(row_print, 4).value
 
         target_page.cell(4, 5).value = self.giv_const('Наименование')
-        target_page.cell(4, 35).value = self.total_customer(s_page.cell(row_print, 3).value, 'name')
+        target_page.cell(4, 35).value = self.total_customer(s_page.cell(row_print, 3).value, row_print, 'name')
 
         target_page.cell(5, 5).value = self.giv_const('Адрес')
-        target_page.cell(5, 35).value = self.total_customer(s_page.cell(row_print, 3).value, 'addr')
+        target_page.cell(5, 35).value = self.total_customer(s_page.cell(row_print, 3).value, row_print, 'addr')
 
         target_page.cell(6, 5).value = f'{self.giv_const("ИНН")}/{self.giv_const("КПП")}'
-        target_page.cell(6, 35).value = self.total_customer(s_page.cell(row_print, 3).value, 'key')
+        target_page.cell(6, 35).value = self.total_customer(s_page.cell(row_print, 3).value, row_print, 'key')
 
-        target_page.cell(8, 5).value = self.total_customer(s_page.cell(row_print, 3).value, 'addr')
+        target_page.cell(8, 5).value = self.total_customer(s_page.cell(row_print, 3).value, row_print, 'addr')
 
         target_page.cell(9, 5).value = s_page.cell(row_print, 6).value
         target_page.cell(10, 5).value = f'№ п/п 1 №{s_page.cell(row_print, 1).value} от ' \

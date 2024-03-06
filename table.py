@@ -3,7 +3,7 @@ import tkinter.ttk as ttk
 
 
 class Table(tk.Frame):
-    def __init__(self, parent=None, headings=tuple(), rows=None, width_column=tuple()):
+    def __init__(self, parent=None, headings=tuple(), rows=None):
         super().__init__(parent)
         self.active = 0
 
@@ -11,8 +11,7 @@ class Table(tk.Frame):
         self.table["columns"] = headings
         self.table["displaycolumns"] = headings
 
-        for countHead in range(len(headings)):
-            head = headings[countHead]
+        for head in headings:
             self.table.heading(head, text=head, anchor=tk.CENTER)
             self.table.column(head, stretch=tk.NO, width=width_column[countHead])
 
