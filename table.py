@@ -3,15 +3,20 @@ import tkinter.ttk as ttk
 
 
 class Table(tk.Frame):
-    def __init__(self, parent=None, headings=tuple(), rows=None):
+    def __init__(self, parent=None, headings=tuple(), rows=None, width_column: tuple = None):
         super().__init__(parent)
+
+        if width_column is None:
+            width_column = tuple()
+
         self.active = 0
 
         self.table = ttk.Treeview(self, show="headings", selectmode="browse")
         self.table["columns"] = headings
         self.table["displaycolumns"] = headings
 
-        for head in headings:
+        for countHead in range(len(headings)):
+            head = headings[countHead]
             self.table.heading(head, text=head, anchor=tk.CENTER)
             self.table.column(head, stretch=tk.NO, width=width_column[countHead])
 
