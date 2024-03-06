@@ -7,6 +7,6 @@ def main():
     TopWin(root)
     root.mainloop()
 
-
+# ТОЧКА ВХОДА
 if __name__ == '__main__':
     main()
