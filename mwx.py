@@ -6,8 +6,8 @@ def fio(str_fio: str, order: str = 'fio') -> str:
     """
     Получить из полного ФИО фамилию и инициалы.
     Параметры:
-        str_fio - строка полные фамилия и мя и отчество
-        order - строка парядок выедения (fio - фамилия и иницыалы, iof - иницыалы фамилия)
+        str_fio - строка полные фамилия имя и отчество
+        order - строка порядок выведения (fio - фамилия и инициалы, iof - инициалы фамилия)
     """
     list_fio = str_fio.split()
     if order == 'fio':
@@ -20,37 +20,46 @@ class MWX:
     def __init__(self) -> None:
         self.book = load_workbook('NBL.xlsx')
 
+    def is_page(self, page_name: str) -> bool:
+        """
+        Проверяет наличие среди листов книги листа с заданным именем
+        :param page_name:
+            page_name - имя страницы
+        :return:
+        """
+        return page_name in self.book.sheetnames
+
     def search_row(self, page_name: str = 'Docs', list_search: list = None) -> int:
         """
-        Поиск строки удавлетворяющей критериям поиска list_search.
+        Поиск строки удовлетворяющей критериям поиска list_search.
         Параметры:
             list_search - список списков [колонка, значение]
         """
         if list_search is None:
             list_search = list()
         result_search = 0
+        if not self.is_page(page_name):
+            return result_search
         sheet = self.book[page_name]
         for row in range(2, sheet.max_row + 1):
-            flag = True
-            for test_col in list_search:
-                flag = flag and (str(sheet.cell(row, test_col[0]).value) == str(test_col[1]))
-            if flag:
+            flags = [str(sheet.cell(row, test_col[0]).value) == str(test_col[1]) for test_col in list_search]
+            if all(flags):
                 result_search = row
                 break
         return result_search
 
-    def giv_const(self, name: str, default: str = None) -> str:
+    def giv_const(self, name: str, my_def: str = None) -> str:
         """
-        Возвращает значение константы. Константы собраны на странице Const.
-        Параметры:
-            name - содержит имя константы значение которой нужно вернуть (всегда первый столбец).
-            default - возвращаемое значение в случае неудачного поиска. По умолчанию - None
+        Возвращает строковое значение константы. Константы собраны на странице Const.
+        :param
+            name - содержит имя константы значение которой нужно вернуть (всегда первый столбец)
+            my_def - возвращаемое значение в случае неудачного поиска. По умолчанию - None
         """
         name_sheet = 'Const'
         list_search = [[1, name]]
         crow = self.search_row(name_sheet, list_search)
         if crow == 0:
-            return default
+            return my_def
         else:
             sheet = self.book[name_sheet]
             return str(sheet.cell(crow, 2).value)
@@ -77,7 +86,7 @@ class MWX:
 
     def search_product(self, cod_: str) -> dict:
         """Осуществляет поиск товара по артикулу и возвращает, в случае успеха,
-        справочник заполненный информацией о товаре. В противном  случае
+        справочник заполненный информацией о товаре. В противном случае
         возвращаемый справочник будет пустым."""
         name_sheet = 'product'
         dict_ret = {'код': '', 'наименование': '', 'единица': '', 'ОКЕИ': ''}
@@ -110,7 +119,7 @@ class MWX:
     def total_customer(self, name_page: str = '', row: int = 0, ret_type: str = 'all') -> str:
         """
         Возвращает форматированную строку с информацией о контрагенте.
-        Парметры:
+        Параметры:
             name_page
             row - номер строки
             ret_type - тип набора возвращаемых данных.
@@ -150,10 +159,10 @@ class MWX:
         """
         Производит подсчет строк идентичных заданной.
         Параметры:
-            name_page - имя стираницы на которой производится подсчет
-            current_row - номер строки, дубли которой считаем
-            list_test - список стобцов по которым проверяем идентичность. Задается
-                паврой - колонка, значение.
+            name_page - имя страницы
+            current_row - номер эталонной строки
+            list_test - список столбцов по которым проверяем идентичность. Задается
+                парой - колонка, значение.
         """
         count_double = 0
         if name_page == '':
@@ -267,7 +276,8 @@ class MWX:
     def prn_p4(self, row_print: int) -> None:
         """
         Вывод документа по форме P4
-        :param row_print: число - номер строки из листа Docs
+        :param
+            row_print: число - номер строки из листа Docs
         :return: None
         """
         s_page = self.book['Docs']
@@ -360,7 +370,8 @@ class MWX:
     def prn_sf(self, row_print: int) -> None:
         """
         Выводит документ СЧЕТ-ФАКТУРУ
-        :param row_print: число номер строки выводимого документа из листа Docs
+        :param
+            row_print: число номер строки выводимого документа из листа Docs
         :return: None
         """
         s_page = self.book['Docs']
@@ -375,15 +386,19 @@ class MWX:
         target_page.cell(2, 19).value = s_page.cell(row_print, 4).value
 
         target_page.cell(4, 5).value = self.giv_const('Наименование')
-        target_page.cell(4, 35).value = self.total_customer(s_page.cell(row_print, 3).value, row_print, 'name')
+        target_page.cell(4, 35).value = self.total_customer(s_page.cell(row_print, 3).value,
+                                                            row_print, 'name')
 
         target_page.cell(5, 5).value = self.giv_const('Адрес')
-        target_page.cell(5, 35).value = self.total_customer(s_page.cell(row_print, 3).value, row_print, 'addr')
+        target_page.cell(5, 35).value = self.total_customer(s_page.cell(row_print, 3).value,
+                                                            row_print, 'addr')
 
         target_page.cell(6, 5).value = f'{self.giv_const("ИНН")}/{self.giv_const("КПП")}'
-        target_page.cell(6, 35).value = self.total_customer(s_page.cell(row_print, 3).value, row_print, 'key')
+        target_page.cell(6, 35).value = self.total_customer(s_page.cell(row_print, 3).value,
+                                                            row_print, 'key')
 
-        target_page.cell(8, 5).value = self.total_customer(s_page.cell(row_print, 3).value, row_print, 'addr')
+        target_page.cell(8, 5).value = self.total_customer(s_page.cell(row_print, 3).value,
+                                                           row_print, 'addr')
 
         target_page.cell(9, 5).value = s_page.cell(row_print, 6).value
         target_page.cell(10, 5).value = f'№ п/п 1 №{s_page.cell(row_print, 1).value} от ' \

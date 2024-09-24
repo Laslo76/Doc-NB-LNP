@@ -101,7 +101,7 @@ class CustWin:
         self.ent_rsc.delete("0", tk.END)
         self.ent_ksc.delete("0", tk.END)
 
-    def up_table(self, name_sheet):
+    def up_table(self, name_sheet: str):
         self.active_row = 0
         self.clear_row()
         rows = self.book.get_str_list(name_list=name_sheet,
@@ -124,7 +124,7 @@ class CustWin:
                      self.ent_okpo.get()]
         if self.book.test_double(name_sheet, self.active_row, [[1, list_data[0]], [9, list_data[9]]]) == 0:
             self.book.save_list(name_sheet, self.active_row, list_data)
-            self.up_table(self, name_sheet)
+            self.up_table(name_sheet)
         else:
             showerror(title='Ошибка сохранение',
                       message=f'Контрагент с ИНН {list_data[0]} и КПП {list_data[8]} уже заведен!')

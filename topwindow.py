@@ -198,7 +198,7 @@ class TopWin:
     def up_table(self, name_sheet):
         self.active_row = 0
         self.clear_row()
-        rows = self.book.get_str_list(name_list='Docs',
+        rows = self.book.get_str_list(name_list=name_sheet,
                                       columns=[{'position': 1, 'format': '', 'trans': ''},
                                                {'position': 4, 'format': '', 'trans': ''},
                                                {'position': 3, 'format': '', 'trans': 'counterparty'}])
